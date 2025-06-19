@@ -47,9 +47,10 @@
 #define SerialPort Serial
 
 // SPI
-SPIClass dev_spi(VSPI);
+SPIClass dev_spi(HSPI);
+
 // Components
-LSM6DSRSensor AccGyr(&dev_spi, 5, 1000000);
+LSM6DSRSensor AccGyr(&dev_spi,15, 10000000);
 
 void setup() {
   // Led.
@@ -59,30 +60,23 @@ void setup() {
   SerialPort.begin(115200);
   
   // Initialize SPI bus.
-  // SPI.begin(sck, miso, mosi, ss)
-  dev_spi.begin(18,22,23,5);
-  //dev_spi.setFrequency(1000000);
-
+  dev_spi.setFrequency(10000000); // Set SPI frequency to 10 MHz
+  dev_spi.setDataMode(SPI_MODE3); // Set SPI mode to MODE3
+  // dev_spi.setBitOrder(MSBFIRST); // Set bit order to MSB first
+  // dev_spi.setHwCs(true); // Use hardware chip select
+  dev_spi.begin();
   
-  int ret=AccGyr.begin();
-  if (ret != 0)
-  {
-    SerialPort.println("Failed to initialize LSM6DSR sensor");
-    while (1)
-    {
-    delay(100);
-    }
-  }
+  AccGyr.begin();
   AccGyr.Enable_X();
   AccGyr.Enable_G();
 }
 
 void loop() {
   // Led blinking.
-//   digitalWrite(LED_BUILTIN, HIGH);
-//   delay(250);
-//   digitalWrite(LED_BUILTIN, LOW);
-//   delay(250);
+  //digitalWrite(LED_BUILTIN, HIGH);
+  delay(250);
+  //digitalWrite(LED_BUILTIN, LOW);
+  delay(250);
 
   // Read accelerometer and gyroscope.
   int32_t accelerometer[3]; // Alternatively, use float accelerometer[3]
@@ -104,5 +98,4 @@ void loop() {
   SerialPort.print(" ");
   SerialPort.print(gyroscope[2]);
   SerialPort.println(" |");
-  //delay(500);
 }
